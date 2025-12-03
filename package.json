@@ -18,6 +18,7 @@
   "homepage": "https://github.com/ra-zo/fbla-pet#readme",
   "description": "",
   "dependencies": {
+    "chart.js": "^4.5.1",
     "sonner": "^2.0.7"
   }
 }

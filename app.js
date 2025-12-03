@@ -1,5 +1,29 @@
 let pet = null;
 
+// Emojis used for fun action feedback around the pet image
+const ACTION_EMOJI_MAP = {
+    feed: ['🍗', '🍖', '🥣', '🍪'],
+    play: ['🎾', '🦴', '🎉', '🤩'],
+    rest: ['💤', '😴', '🌙', '🛏️'],
+    clean: ['🛁', '🧼', '🧽', '✨'],
+    healthCheck: ['💖', '💊', '🏥', '🩺'],
+    buyToy: ['🧸', '🎈', '🎁', '🐾'],
+    chore: ['💵', '💰', '📈', '⭐']
+};
+
+const PET_ANIMATION_CLASSES = [
+    'pet-wiggle',
+    'pet-bounce',
+    'pet-cozy',
+    'pet-shine',
+    'pet-pulse',
+    'pet-earn'
+];
+
+let spendingChart = null;
+let budgetChart = null;
+let budgetHistory = [];
+
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     const createPetBtn = document.getElementById('createPetBtn');
@@ -35,6 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    const renameBtn = document.getElementById('renamePetBtn');
+    if (renameBtn) {
+        renameBtn.addEventListener('click', handleRenamePet);
+    }
 });
 
 function createPet() {
@@ -56,14 +85,16 @@ function createPet() {
     
     // Hide setup modal, show game area
     document.getElementById('setupModal').classList.add('hidden');
-    document.getElementById('gameArea').classList.remove('hidden');
+    const gameArea = document.getElementById('gameArea');
+    gameArea.classList.remove('hidden');
+    
+    // Update display immediately (synchronously)
+    updatePetDisplay();
     
     // Setup action buttons
     setupActionButtons();
     
-    // Initial display update
-    updatePetDisplay();
-    
+    // Show welcome message
     showMessage(`Welcome ${name}! Take good care of your pet!`, 'success');
 }
 
@@ -93,27 +124,34 @@ function performAction(action) {
     switch(action) {
         case 'feed':
             result = pet.feed();
+            playPetAnimation('pet-bounce');
             break;
         case 'play':
             result = pet.play();
+            playPetAnimation('pet-wiggle');
             break;
         case 'rest':
             result = pet.rest();
+            playPetAnimation('pet-cozy');
             break;
         case 'clean':
             result = pet.clean();
+            playPetAnimation('pet-shine');
             break;
         case 'healthCheck':
             result = pet.healthCheck();
+            playPetAnimation('pet-pulse');
             break;
         case 'buyToy':
             result = pet.buyToy();
+            playPetAnimation('pet-wiggle');
             break;
     }
     
     if (result) {
         if (result.success) {
             showMessage(result.message, 'success');
+            triggerActionEmojis(action);
         } else {
             showMessage(result.message, 'error');
         }
@@ -127,6 +165,8 @@ function performChore(choreType) {
     const result = pet.doChore(choreType);
     if (result.success) {
         showMessage(result.message, 'success');
+        triggerActionEmojis('chore');
+        playPetAnimation('pet-earn');
     } else {
         showMessage(result.message, 'error');
     }
@@ -155,18 +195,15 @@ function setSavingsGoal() {
 function updatePetDisplay() {
     if (!pet) return;
     
-    // Update pet video (video is already set in HTML, just ensure it's playing)
-    const petVideo = document.getElementById('petVideo');
-    if (petVideo && petVideo.paused) {
-        petVideo.play().catch(e => console.log('Video autoplay prevented:', e));
-    }
-    document.getElementById('petNameDisplay').textContent = pet.name;
+    const petNameText = document.getElementById('petNameText');
+    if (petNameText) petNameText.textContent = pet.name;
     
-    // Update mood
     const mood = pet.getMood();
     const moodElement = document.getElementById('petMood');
+    if (moodElement) {
     moodElement.textContent = mood.text;
     moodElement.className = 'pet-mood ' + mood.class;
+    }
     
     // Update stats
     updateStatBar('hunger', pet.hunger);
@@ -174,19 +211,25 @@ function updatePetDisplay() {
     updateStatBar('health', pet.health);
     updateStatBar('energy', pet.energy);
     
-    // Update budget
-    document.getElementById('availableBudget').textContent = `$${pet.budget.toFixed(2)}`;
-    document.getElementById('totalSpent').textContent = `$${pet.totalSpent.toFixed(2)}`;
-    document.getElementById('savingsGoal').textContent = `$${pet.savingsGoal.toFixed(2)}`;
+    const availableBudgetEl = document.getElementById('availableBudget');
+    const totalSpentEl = document.getElementById('totalSpent');
+    const savingsGoalEl = document.getElementById('savingsGoal');
+    if (availableBudgetEl) availableBudgetEl.textContent = `$${pet.budget.toFixed(2)}`;
+    if (totalSpentEl) totalSpentEl.textContent = `$${pet.totalSpent.toFixed(2)}`;
+    if (savingsGoalEl) savingsGoalEl.textContent = `$${pet.savingsGoal.toFixed(2)}`;
     
-    // Update expense list
+    const totalExpensesDisplay = document.getElementById('totalExpensesDisplay');
+    if (totalExpensesDisplay) {
+        totalExpensesDisplay.textContent = `$${pet.totalSpent.toFixed(0)}`;
+    }
+    
     updateExpenseList();
-    
-    // Update savings progress
     updateSavingsProgress();
-    
-    // Update button states
     updateButtonStates();
+    
+    recordBudgetPoint();
+    updateSpendingChart();
+    updateBudgetChart();
 }
 
 function updateStatBar(statName, value) {
@@ -194,10 +237,16 @@ function updateStatBar(statName, value) {
     const valueElement = document.getElementById(statName + 'Value');
     
     if (bar && valueElement) {
-        bar.style.width = value + '%';
-        valueElement.textContent = Math.round(value) + '%';
+        // Update immediately without transitions for initial load
+        const isInitialLoad = !bar.style.width || bar.style.width === '0%';
+        if (isInitialLoad) {
+            bar.style.transition = 'none';
+        }
         
-        // Change color based on value
+        bar.style.width = value + '%';
+        valueElement.textContent = Math.round(value);
+        
+        // Change color based on value with gradients
         if (value > 70) {
             bar.style.background = 'linear-gradient(90deg, #28a745, #20c997)';
         } else if (value > 40) {
@@ -205,7 +254,153 @@ function updateStatBar(statName, value) {
         } else {
             bar.style.background = 'linear-gradient(90deg, #dc3545, #c82333)';
         }
+        
+        // Re-enable transitions after initial load
+        if (isInitialLoad) {
+            setTimeout(() => {
+                bar.style.transition = 'width 0.5s ease, background 0.3s ease';
+            }, 100);
+        }
     }
+}
+
+function recordBudgetPoint() {
+    if (!pet) return;
+    
+    budgetHistory.push({
+        label: budgetHistory.length + 1,
+        available: pet.budget,
+        spent: pet.totalSpent
+    });
+    
+    if (budgetHistory.length > 20) {
+        budgetHistory.shift();
+    }
+}
+
+function updateSpendingChart() {
+    if (typeof Chart === 'undefined' || !pet) return;
+    
+    const canvas = document.getElementById('spendingChart');
+    if (!canvas) return;
+    
+    const breakdown = pet.getExpenseBreakdown();
+    const labels = Object.keys(breakdown);
+    if (labels.length === 0) {
+        if (spendingChart) {
+            spendingChart.destroy();
+            spendingChart = null;
+        }
+        return;
+    }
+    
+    const data = labels.map(label => breakdown[label]);
+    const colors = [
+        '#4e79a7', '#f28e2b', '#e15759', '#76b7b2',
+        '#59a14f', '#edc949', '#af7aa1', '#ff9da7'
+    ];
+    
+    if (spendingChart) {
+        spendingChart.destroy();
+    }
+    
+    spendingChart = new Chart(canvas.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{
+                data,
+                backgroundColor: colors.slice(0, labels.length),
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 14,
+                        boxHeight: 14
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const label = ctx.label || '';
+                            const value = ctx.parsed;
+                            return `${label}: $${value.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            cutout: '55%'
+        }
+    });
+}
+
+function updateBudgetChart() {
+    if (typeof Chart === 'undefined') return;
+    
+    const canvas = document.getElementById('budgetChart');
+    if (!canvas || budgetHistory.length === 0) return;
+    
+    const labels = budgetHistory.map(point => `Turn ${point.label}`);
+    const availableData = budgetHistory.map(point => point.available);
+    const spentData = budgetHistory.map(point => point.spent);
+    
+    if (budgetChart) {
+        budgetChart.destroy();
+    }
+    
+    budgetChart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Available Budget',
+                    data: availableData,
+                    borderColor: '#4ecdc4',
+                    backgroundColor: 'rgba(78,205,196,0.2)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Total Spent',
+                    data: spentData,
+                    borderColor: '#ff6b6b',
+                    backgroundColor: 'rgba(255,107,107,0.15)',
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (value) => `$${value}`
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const label = ctx.dataset.label || '';
+                            const value = ctx.parsed.y;
+                            return `${label}: $${value.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 function updateExpenseList() {
@@ -263,20 +458,92 @@ function updateButtonStates() {
 }
 
 function showMessage(message, type = 'info') {
-    const messageArea = document.getElementById('messageArea');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${type}`;
-    messageDiv.textContent = message;
+    // Use Sonner toast API
+    if (window.toast) {
+        const toastOptions = {
+            duration: 5000,
+        };
+        
+        switch(type) {
+            case 'success':
+                window.toast.success(message, toastOptions);
+                break;
+            case 'error':
+                window.toast.error(message, toastOptions);
+                break;
+            case 'warning':
+                window.toast.warning(message, toastOptions);
+                break;
+            case 'info':
+            default:
+                window.toast.info(message, toastOptions);
+                break;
+        }
+    } else {
+        // Fallback to console if toast is not loaded
+        console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+}
+
+function handleRenamePet() {
+    if (!pet) {
+        showMessage('Please create your pet before renaming!', 'error');
+        return;
+    }
     
-    messageArea.appendChild(messageDiv);
+    const newName = prompt('Rename your pet:', pet.name);
+    if (newName === null) return;
     
-    // Auto-scroll to bottom
-    messageArea.scrollTop = messageArea.scrollHeight;
+    const trimmed = newName.trim();
+    if (!trimmed) {
+        showMessage('Pet name cannot be empty!', 'error');
+        return;
+    }
     
-    // Remove message after 5 seconds
+    pet.name = trimmed;
+    updatePetDisplay();
+    showMessage(`Your pet is now called ${trimmed}!`, 'success');
+}
+
+function triggerActionEmojis(actionKey) {
+    const emojis = ACTION_EMOJI_MAP[actionKey];
+    if (!emojis) return;
+    
+    const wrapper = document.querySelector('.pet-video-wrapper');
+    if (!wrapper) return;
+    
+    const bursts = 3;
+    for (let i = 0; i < bursts; i++) {
+        const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+        createEmojiBurst(wrapper, emoji);
+    }
+}
+
+function createEmojiBurst(wrapper, emoji) {
+    const burst = document.createElement('span');
+    burst.className = 'pet-emoji-burst';
+    burst.textContent = emoji;
+    
+    const offsetX = (Math.random() * 60) - 30;
+    const offsetY = (Math.random() * 40) - 20;
+    burst.style.left = `calc(50% + ${offsetX}px)`;
+    burst.style.top = `calc(50% + ${offsetY}px)`;
+    
+    wrapper.appendChild(burst);
+    
     setTimeout(() => {
-        messageDiv.remove();
-    }, 5000);
+        burst.remove();
+    }, 1200);
+}
+
+function playPetAnimation(animationClass) {
+    const img = document.querySelector('.pet-image');
+    if (!img) return;
+    
+    PET_ANIMATION_CLASSES.forEach(cls => img.classList.remove(cls));
+    // Force reflow so the animation can restart
+    void img.offsetWidth;
+    img.classList.add(animationClass);
 }
 
 // Q&A System

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Virtual Pet - Care & Budget Simulator</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/sonner@2.0.7/dist/sonner.css">
+    <link rel="icon" href="transparentcorgi.png" type="image/png" sizes="32x32" />
 </head>
 <body>
     <div class="container">
@@ -46,156 +48,235 @@
 
         <!-- Main Game Area -->
         <div id="gameArea" class="game-area hidden">
-            <!-- Pet Display -->
-            <div class="pet-section">
-                <div class="pet-display">
-                    <video id="petVideo" class="pet-video" autoplay loop muted playsinline>
-                        <source src="video (1).mp4" type="video/mp4">
-                    </video>
-                    <div id="petNameDisplay" class="pet-name"></div>
-                    <div id="petMood" class="pet-mood"></div>
-                </div>
+            <!-- Pet Display and Stats Section -->
+            <div class="pet-stats-section">
+                <div class="pet-stats-main">
+                    <!-- Pet Display (Left) -->
+                    <div class="pet-display-container">
+                        <div class="pet-video-wrapper">
+                            <img id="petImage" src="transparentcorgi.png" alt="Pet" class="pet-image">
+                            <div class="pet-sparkle">✨</div>
+                        </div>
+                        <div id="petNameDisplay" class="pet-name">
+                            <span id="petNameText"></span>
+                            <button id="renamePetBtn" class="rename-pet-btn" aria-label="Rename pet">
+                                ✏️
+                            </button>
+                        </div>
+                        <div id="petMood" class="pet-mood"></div>
+                    </div>
 
-                <!-- Pet Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Hunger</div>
-                        <div class="stat-bar">
-                            <div id="hungerBar" class="stat-fill"></div>
+                    <!-- Pet Stats (Right) -->
+                    <div class="stats-container">
+                        <h3 class="stats-title"><span class="stats-emoji">📊</span> <span class="stats-text">Stats</span></h3>
+                        <div class="stats-list">
+                            <div class="stat-item">
+                                <div class="stat-header">
+                                    <span class="stat-label">🍽️ Hunger</span>
+                                    <span id="hungerValue" class="stat-value">100</span>
+                                </div>
+                                <div class="stat-bar-container">
+                                    <div id="hungerBar" class="stat-bar-fill"></div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-header">
+                                    <span class="stat-label">😊 Happiness</span>
+                                    <span id="happinessValue" class="stat-value">100</span>
+                                </div>
+                                <div class="stat-bar-container">
+                                    <div id="happinessBar" class="stat-bar-fill"></div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-header">
+                                    <span class="stat-label">⚡ Energy</span>
+                                    <span id="energyValue" class="stat-value">100</span>
+                                </div>
+                                <div class="stat-bar-container">
+                                    <div id="energyBar" class="stat-bar-fill"></div>
+                                </div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-header">
+                                    <span class="stat-label">💚 Health</span>
+                                    <span id="healthValue" class="stat-value">100</span>
+                                </div>
+                                <div class="stat-bar-container">
+                                    <div id="healthBar" class="stat-bar-fill"></div>
+                                </div>
+                            </div>
                         </div>
-                        <div id="hungerValue" class="stat-value">100%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Happiness</div>
-                        <div class="stat-bar">
-                            <div id="happinessBar" class="stat-fill"></div>
+                        
+                        <!-- Action Buttons (Under Stats) -->
+                        <div class="actions-inline">
+                            <h3 class="actions-title">🎮 Take Action</h3>
+                            <div class="actions-grid">
+                                <button id="feedBtn" class="action-btn action-feed">
+                                    <span class="action-emoji">🍽️</span>
+                                    <div class="action-content">
+                                        <span class="action-name">Feed</span>
+                                        <span class="action-cost">$5</span>
+                                    </div>
+                                </button>
+                                <button id="playBtn" class="action-btn action-play">
+                                    <span class="action-emoji">🎾</span>
+                                    <div class="action-content">
+                                        <span class="action-name">Play</span>
+                                        <span class="action-cost">$3</span>
+                                    </div>
+                                </button>
+                                <button id="restBtn" class="action-btn action-rest">
+                                    <span class="action-emoji">😴</span>
+                                    <div class="action-content">
+                                        <span class="action-name">Rest</span>
+                                        <span class="action-cost">Free</span>
+                                    </div>
+                                </button>
+                                <button id="cleanBtn" class="action-btn action-clean">
+                                    <span class="action-emoji">🛁</span>
+                                    <div class="action-content">
+                                        <span class="action-name">Clean</span>
+                                        <span class="action-cost">$4</span>
+                                    </div>
+                                </button>
+                                <button id="healthCheckBtn" class="action-btn action-vet">
+                                    <span class="action-emoji">🏥</span>
+                                    <div class="action-content">
+                                        <span class="action-name">Health Check</span>
+                                        <span class="action-cost">$15</span>
+                                    </div>
+                                </button>
+                                <button id="toyBtn" class="action-btn action-toy">
+                                    <span class="action-emoji">🧸</span>
+                                    <div class="action-content">
+                                        <span class="action-name">Toy</span>
+                                        <span class="action-cost">$10</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="total-expenses">
+                                <span class="expenses-label">💰 Total Expenses:</span>
+                                <span id="totalExpensesDisplay" class="expenses-amount">$0</span>
+                            </div>
                         </div>
-                        <div id="happinessValue" class="stat-value">100%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Health</div>
-                        <div class="stat-bar">
-                            <div id="healthBar" class="stat-fill"></div>
-                        </div>
-                        <div id="healthValue" class="stat-value">100%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Energy</div>
-                        <div class="stat-bar">
-                            <div id="energyBar" class="stat-fill"></div>
-                        </div>
-                        <div id="energyValue" class="stat-value">100%</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Budget Section -->
-            <div class="budget-section">
-                <div class="budget-card">
-                    <h3>💰 Budget & Expenses</h3>
-                    <div class="budget-info">
-                        <div class="budget-item">
-                            <span>Available:</span>
-                            <span id="availableBudget" class="amount">$100.00</span>
+            <!-- Earning, Savings, and Budget Section -->
+            <div class="earning-savings-section">
+                <div class="earning-section-compact">
+                    <h3 class="earning-title"><span class="title-emoji">💼</span> <span class="title-text">Earn & Save</span></h3>
+                    <div class="chores-grid-compact">
+                        <button id="chore1Btn" class="chore-btn-compact">
+                            <span class="chore-emoji">📚</span>
+                            <span class="chore-name-compact">Study</span>
+                            <span class="chore-reward-compact">+$5</span>
+                        </button>
+                        <button id="chore2Btn" class="chore-btn-compact">
+                            <span class="chore-emoji">🧹</span>
+                            <span class="chore-name-compact">Clean Room</span>
+                            <span class="chore-reward-compact">+$8</span>
+                        </button>
+                        <button id="chore3Btn" class="chore-btn-compact">
+                            <span class="chore-emoji">🌱</span>
+                            <span class="chore-name-compact">Water Plants</span>
+                            <span class="chore-reward-compact">+$3</span>
+                        </button>
+                        <button id="chore4Btn" class="chore-btn-compact">
+                            <span class="chore-emoji">📝</span>
+                            <span class="chore-name-compact">Homework</span>
+                            <span class="chore-reward-compact">+$6</span>
+                        </button>
+                    </div>
+                    <div class="savings-inline">
+                        <h4>Set a Savings Goal</h4>
+                        <div class="savings-controls-compact">
+                            <input type="number" id="goalAmount" placeholder="Goal amount ($)" min="10" step="10" class="goal-input">
+                            <button id="setGoalBtn" class="btn btn-secondary btn-compact">Set Goal</button>
                         </div>
-                        <div class="budget-item">
-                            <span>Total Spent:</span>
-                            <span id="totalSpent" class="amount spent">$0.00</span>
+                        <div id="goalProgress" class="goal-progress-compact hidden">
+                            <div class="progress-bar-compact">
+                                <div id="goalProgressBar" class="progress-fill-compact"></div>
+                            </div>
+                            <div class="progress-text-compact">
+                                <span id="goalProgressText">0%</span>
+                            </div>
                         </div>
-                        <div class="budget-item">
-                            <span>Savings Goal:</span>
-                            <span id="savingsGoal" class="amount goal">$0.00</span>
+                    </div>
+                </div>
+                
+                <div class="budget-container">
+                    <h3 class="budget-title"><span class="title-emoji">💰</span> <span class="title-text">Budget & Expenses</span></h3>
+                    <div class="budget-grid">
+                        <div class="budget-card-compact">
+                            <div class="budget-label">Available</div>
+                            <div id="availableBudget" class="budget-value budget-available">$100.00</div>
+                        </div>
+                        <div class="budget-card-compact">
+                            <div class="budget-label">Total Spent</div>
+                            <div id="totalSpent" class="budget-value budget-spent">$0.00</div>
+                        </div>
+                        <div class="budget-card-compact">
+                            <div class="budget-label">Savings Goal</div>
+                            <div id="savingsGoal" class="budget-value budget-goal">$0.00</div>
                         </div>
                     </div>
-                    <div class="expense-breakdown">
-                        <h4>Expense Breakdown</h4>
-                        <div id="expenseList" class="expense-list"></div>
+                    <div class="expense-breakdown-compact">
+                        <h4>Recent Expenses</h4>
+                        <div id="expenseList" class="expense-list-compact"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Actions Section -->
-            <div class="actions-section">
-                <h3>Pet Care Actions</h3>
-                <div class="actions-grid">
-                    <button id="feedBtn" class="action-btn">
-                        <span class="action-icon">🍽️</span>
-                        <span class="action-name">Feed</span>
-                        <span class="action-cost">$5.00</span>
-                    </button>
-                    <button id="playBtn" class="action-btn">
-                        <span class="action-icon">🎾</span>
-                        <span class="action-name">Play</span>
-                        <span class="action-cost">$3.00</span>
-                    </button>
-                    <button id="restBtn" class="action-btn">
-                        <span class="action-icon">😴</span>
-                        <span class="action-name">Rest</span>
-                        <span class="action-cost">Free</span>
-                    </button>
-                    <button id="cleanBtn" class="action-btn">
-                        <span class="action-icon">🛁</span>
-                        <span class="action-name">Clean</span>
-                        <span class="action-cost">$4.00</span>
-                    </button>
-                    <button id="healthCheckBtn" class="action-btn">
-                        <span class="action-icon">🏥</span>
-                        <span class="action-name">Health Check</span>
-                        <span class="action-cost">$15.00</span>
-                    </button>
-                    <button id="toyBtn" class="action-btn">
-                        <span class="action-icon">🧸</span>
-                        <span class="action-name">Buy Toy</span>
-                        <span class="action-cost">$10.00</span>
-                    </button>
+            <!-- Financial Insights Section -->
+            <div class="charts-section">
+                <div class="chart-card">
+                    <h3 class="chart-title"><span class="title-emoji">📊</span> <span class="title-text">Spending Breakdown</span></h3>
+                    <p class="chart-caption">See how your pet budget is divided between food, vet visits, toys, and more.</p>
+                    <canvas id="spendingChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title"><span class="title-emoji">📈</span> <span class="title-text">Budget Over Time</span></h3>
+                    <p class="chart-caption">Track your available money as you earn from chores and spend on your pet.</p>
+                    <canvas id="budgetChart"></canvas>
                 </div>
             </div>
 
-            <!-- Earning Section -->
-            <div class="earning-section">
-                <h3>💼 Earn Money</h3>
-                <div class="chores-grid">
-                    <button id="chore1Btn" class="chore-btn">
-                        <span class="chore-name">📚 Study</span>
-                        <span class="chore-reward">+$5</span>
-                    </button>
-                    <button id="chore2Btn" class="chore-btn">
-                        <span class="chore-name">🧹 Clean Room</span>
-                        <span class="chore-reward">+$8</span>
-                    </button>
-                    <button id="chore3Btn" class="chore-btn">
-                        <span class="chore-name">🌱 Water Plants</span>
-                        <span class="chore-reward">+$3</span>
-                    </button>
-                    <button id="chore4Btn" class="chore-btn">
-                        <span class="chore-name">📝 Homework</span>
-                        <span class="chore-reward">+$6</span>
-                    </button>
+            <!-- Interactive Q&A and Tips Section -->
+            <div class="qa-tips-section">
+                <div class="qa-section-compact">
+                    <h3 class="qa-title-compact"><span class="title-emoji">💡</span> <span class="title-text">Interactive Q&A</span></h3>
+                    <p class="qa-description-compact">Test your knowledge about pet care and financial responsibility!</p>
+                    <button id="startQABtn" class="btn btn-primary qa-btn-compact">Start Quiz</button>
                 </div>
-            </div>
-
-            <!-- Savings Goals Section -->
-            <div class="savings-section">
-                <h3>🎯 Savings Goals</h3>
-                <div class="savings-controls">
-                    <input type="number" id="goalAmount" placeholder="Goal amount ($)" min="10" step="10">
-                    <button id="setGoalBtn" class="btn btn-secondary">Set Goal</button>
-                </div>
-                <div id="goalProgress" class="goal-progress hidden">
-                    <div class="progress-bar">
-                        <div id="goalProgressBar" class="progress-fill"></div>
-                    </div>
-                    <div class="progress-text">
-                        <span id="goalProgressText">0%</span>
+                
+                <div class="tips-section-compact">
+                    <h3 class="tips-title-compact"><span class="title-emoji">✨</span> <span class="title-text">Quick Tips</span></h3>
+                    <div class="tips-list">
+                        <div class="tip-item">
+                            <span class="tip-icon">🍽️</span>
+                            <span class="tip-text">Feed your pet regularly to keep hunger above 40%</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">🎾</span>
+                            <span class="tip-text">Play when energy is above 20% for best results</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">😴</span>
+                            <span class="tip-text">Rest is free! Use it to restore energy</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">💰</span>
+                            <span class="tip-text">Complete chores to earn money for pet care</span>
+                        </div>
+                        <div class="tip-item">
+                            <span class="tip-icon">🏥</span>
+                            <span class="tip-text">Health checks are important when health drops below 30%</span>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Interactive Q&A Section -->
-            <div class="qa-section">
-                <h3>💡 Interactive Q&A</h3>
-                <p class="qa-description">Test your knowledge about pet care and financial responsibility!</p>
-                <button id="startQABtn" class="btn btn-primary">Start Quiz</button>
                 
                 <div id="qaModal" class="qa-modal hidden">
                     <div class="qa-modal-content">
@@ -216,10 +297,15 @@
                 </div>
             </div>
 
-            <!-- Messages -->
-            <div id="messageArea" class="message-area"></div>
         </div>
+            
+            <div class="credits-section">
+                <p>Created by Natalie Razo & Presley Symonds for FBLA</p>
+            </div>
     </div>
+
+    <!-- Sonner Toaster -->
+    <div id="sonner-root"></div>
 
     <!-- Help Modal -->
     <div id="helpModal" class="help-modal hidden">
@@ -373,6 +459,211 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/sonner@2.0.7/dist/sonner.umd.js"></script>
+    <script>
+        // Initialize Sonner for vanilla JS
+        // Sonner requires React, so we'll use a vanilla JS compatible approach
+        // Using a simple toast implementation that mimics Sonner's API
+        (function() {
+            // Create toast container if it doesn't exist
+            let toastContainer = document.getElementById('sonner-root');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.id = 'sonner-root';
+                document.body.appendChild(toastContainer);
+            }
+            
+            // Simple toast implementation compatible with Sonner API
+            window.toast = {
+                success: function(message, options) {
+                    showSonnerToast(message, 'success', options);
+                },
+                error: function(message, options) {
+                    showSonnerToast(message, 'error', options);
+                },
+                info: function(message, options) {
+                    showSonnerToast(message, 'info', options);
+                },
+                warning: function(message, options) {
+                    showSonnerToast(message, 'warning', options);
+                }
+            };
+            
+            let toastCount = 0;
+            const toastStack = [];
+            
+            function showSonnerToast(message, type, options) {
+                const duration = (options && options.duration) || 5000;
+                const toastId = `toast-${Date.now()}-${toastCount++}`;
+                
+                const toast = document.createElement('div');
+                toast.id = toastId;
+                toast.className = `sonner-toast sonner-toast-${type}`;
+                
+                // Create toast content
+                const toastContent = document.createElement('div');
+                toastContent.className = 'sonner-toast-content';
+                
+                // Add icon based on type
+                const icons = {
+                    success: '✓',
+                    error: '✕',
+                    info: 'ℹ',
+                    warning: '⚠'
+                };
+                
+                const icon = document.createElement('span');
+                icon.className = 'sonner-toast-icon';
+                icon.textContent = icons[type] || icons.info;
+                
+                const messageEl = document.createElement('span');
+                messageEl.className = 'sonner-toast-message';
+                messageEl.textContent = message;
+                
+                toastContent.appendChild(icon);
+                toastContent.appendChild(messageEl);
+                toast.appendChild(toastContent);
+                
+                // Add styles
+                Object.assign(toast.style, {
+                    position: 'fixed',
+                    right: '20px',
+                    padding: '0',
+                    borderRadius: '8px',
+                    backgroundColor: 'white',
+                    color: '#1f2937',
+                    fontWeight: '500',
+                    zIndex: '10000',
+                    boxShadow: '0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2)',
+                    animation: 'slideIn 0.3s ease-out',
+                    maxWidth: '356px',
+                    minWidth: '300px',
+                    wordWrap: 'break-word',
+                    border: '1px solid #e5e7eb',
+                    overflow: 'hidden'
+                });
+                
+                // Set border color based on type
+                const borderColors = {
+                    success: '#10b981',
+                    error: '#ef4444',
+                    info: '#3b82f6',
+                    warning: '#f59e0b'
+                };
+                toast.style.borderLeft = `4px solid ${borderColors[type] || borderColors.info}`;
+                
+                // Position toast (stack them)
+                const topOffset = 20 + (toastStack.length * 80);
+                toast.style.top = `${topOffset}px`;
+                
+                toastStack.push(toastId);
+                
+                // Style the content
+                Object.assign(toastContent.style, {
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    padding: '16px'
+                });
+                
+                // Style the icon
+                Object.assign(icon.style, {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    flexShrink: '0'
+                });
+                
+                const iconColors = {
+                    success: { bg: '#d1fae5', color: '#10b981' },
+                    error: { bg: '#fee2e2', color: '#ef4444' },
+                    info: { bg: '#dbeafe', color: '#3b82f6' },
+                    warning: { bg: '#fef3c7', color: '#f59e0b' }
+                };
+                const iconStyle = iconColors[type] || iconColors.info;
+                icon.style.backgroundColor = iconStyle.bg;
+                icon.style.color = iconStyle.color;
+                
+                // Style the message
+                Object.assign(messageEl.style, {
+                    flex: '1',
+                    fontSize: '14px',
+                    lineHeight: '1.5'
+                });
+                
+                const container = document.getElementById('sonner-root') || document.body;
+                container.appendChild(toast);
+                
+                // Remove after duration
+                const timeoutId = setTimeout(() => {
+                    removeToast(toastId);
+                }, duration);
+                
+                // Allow click to dismiss
+                toast.addEventListener('click', () => {
+                    clearTimeout(timeoutId);
+                    removeToast(toastId);
+                });
+            }
+            
+            function removeToast(toastId) {
+                const toast = document.getElementById(toastId);
+                if (toast) {
+                    toast.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                        // Remove from stack and reposition others
+                        const index = toastStack.indexOf(toastId);
+                        if (index > -1) {
+                            toastStack.splice(index, 1);
+                        }
+                        repositionToasts();
+                    }, 300);
+                }
+            }
+            
+            function repositionToasts() {
+                const toasts = document.querySelectorAll('.sonner-toast');
+                toasts.forEach((toast, index) => {
+                    toast.style.top = `${20 + (index * 80)}px`;
+                });
+            }
+            
+            // Add CSS animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                @keyframes slideOut {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <script src="app.js"></script>
     <script src="pet.js"></script>
 
