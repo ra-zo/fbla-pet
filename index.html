@@ -9,8 +9,13 @@
 <body>
     <div class="container">
         <header>
-            <h1>🐾 Virtual Pet Care Simulator</h1>
-            <p class="subtitle">Learn about pet ownership and financial responsibility!</p>
+            <div class="header-content">
+                <div>
+                    <h1>🐾 Virtual Pet Care Simulator</h1>
+                    <p class="subtitle">Learn about pet ownership and financial responsibility!</p>
+                </div>
+                <button id="helpBtn" class="help-btn" title="Help & Guide">❓ Help</button>
+            </div>
         </header>
 
         <!-- Pet Setup Modal -->
@@ -44,7 +49,9 @@
             <!-- Pet Display -->
             <div class="pet-section">
                 <div class="pet-display">
-                    <div id="petEmoji" class="pet-emoji">🐕</div>
+                    <video id="petVideo" class="pet-video" autoplay loop muted playsinline>
+                        <source src="video (1).mp4" type="video/mp4">
+                    </video>
                     <div id="petNameDisplay" class="pet-name"></div>
                     <div id="petMood" class="pet-mood"></div>
                 </div>
@@ -184,8 +191,185 @@
                 </div>
             </div>
 
+            <!-- Interactive Q&A Section -->
+            <div class="qa-section">
+                <h3>💡 Interactive Q&A</h3>
+                <p class="qa-description">Test your knowledge about pet care and financial responsibility!</p>
+                <button id="startQABtn" class="btn btn-primary">Start Quiz</button>
+                
+                <div id="qaModal" class="qa-modal hidden">
+                    <div class="qa-modal-content">
+                        <div class="qa-header">
+                            <h3 id="qaQuestionNumber">Question 1 of 5</h3>
+                            <button id="closeQABtn" class="qa-close-btn">×</button>
+                        </div>
+                        <div class="qa-body">
+                            <p id="qaQuestion" class="qa-question"></p>
+                            <div id="qaOptions" class="qa-options"></div>
+                            <div id="qaFeedback" class="qa-feedback hidden"></div>
+                        </div>
+                        <div class="qa-footer">
+                            <div id="qaScore" class="qa-score">Score: 0/0</div>
+                            <button id="qaNextBtn" class="btn btn-secondary hidden">Next Question</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Messages -->
             <div id="messageArea" class="message-area"></div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="help-modal hidden">
+        <div class="help-modal-content">
+            <div class="help-header">
+                <h2>📚 Help & Guide</h2>
+                <button id="closeHelpBtn" class="help-close-btn">×</button>
+            </div>
+            <div class="help-body">
+                <div class="help-section">
+                    <h3>🎮 Getting Started</h3>
+                    <p>Welcome to the Virtual Pet Care Simulator! This game teaches you about pet ownership and financial responsibility.</p>
+                    <ul>
+                        <li><strong>Create Your Pet:</strong> Choose a name, type, and starting budget ($50-$500)</li>
+                        <li><strong>Monitor Stats:</strong> Keep an eye on Hunger, Happiness, Health, and Energy</li>
+                        <li><strong>Manage Budget:</strong> Balance spending on pet care with earning money through chores</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>🐾 Pet Care Actions</h3>
+                    <div class="help-action-list">
+                        <div class="help-action-item">
+                            <span class="help-icon">🍽️</span>
+                            <div>
+                                <strong>Feed</strong> - $5.00<br>
+                                <small>Increases Hunger +30, Happiness +5</small>
+                            </div>
+                        </div>
+                        <div class="help-action-item">
+                            <span class="help-icon">🎾</span>
+                            <div>
+                                <strong>Play</strong> - $3.00<br>
+                                <small>Increases Happiness +25, decreases Energy -15</small>
+                            </div>
+                        </div>
+                        <div class="help-action-item">
+                            <span class="help-icon">😴</span>
+                            <div>
+                                <strong>Rest</strong> - Free<br>
+                                <small>Increases Energy +40, Health +5</small>
+                            </div>
+                        </div>
+                        <div class="help-action-item">
+                            <span class="help-icon">🛁</span>
+                            <div>
+                                <strong>Clean</strong> - $4.00<br>
+                                <small>Increases Health +15, Happiness +10</small>
+                            </div>
+                        </div>
+                        <div class="help-action-item">
+                            <span class="help-icon">🏥</span>
+                            <div>
+                                <strong>Health Check</strong> - $15.00<br>
+                                <small>Increases Health +30 (important when health is low!)</small>
+                            </div>
+                        </div>
+                        <div class="help-action-item">
+                            <span class="help-icon">🧸</span>
+                            <div>
+                                <strong>Buy Toy</strong> - $10.00<br>
+                                <small>Increases Happiness +20</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>💼 Earning Money</h3>
+                    <p>Complete chores to earn money for pet care:</p>
+                    <div class="help-action-list">
+                        <div class="help-action-item">
+                            <span class="help-icon">📚</span>
+                            <div>
+                                <strong>Study</strong> - Earn $5.00
+                            </div>
+                        </div>
+                        <div class="help-action-item">
+                            <span class="help-icon">🧹</span>
+                            <div>
+                                <strong>Clean Room</strong> - Earn $8.00
+                            </div>
+                        </div>
+                        <div class="help-action-item">
+                            <span class="help-icon">🌱</span>
+                            <div>
+                                <strong>Water Plants</strong> - Earn $3.00
+                            </div>
+                        </div>
+                        <div class="help-action-item">
+                            <span class="help-icon">📝</span>
+                            <div>
+                                <strong>Homework</strong> - Earn $6.00
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="help-section">
+                    <h3>🎯 Savings Goals</h3>
+                    <p>Set savings goals to track your progress and learn financial planning:</p>
+                    <ul>
+                        <li>Enter a goal amount (minimum $10)</li>
+                        <li>Watch your progress bar fill as you save</li>
+                        <li>Reach your goal to practice good financial habits!</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>💡 Interactive Q&A</h3>
+                    <p>Test your knowledge and earn rewards:</p>
+                    <ul>
+                        <li>Answer 5 random questions about pet care and finances</li>
+                        <li>Earn $5.00 + stat boost for each correct answer</li>
+                        <li>Get bonus rewards based on your final score:
+                            <ul>
+                                <li>100%: $15.00 + happiness boost</li>
+                                <li>80%+: $10.00 + happiness boost</li>
+                                <li>60%+: $5.00</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>💡 Tips & Tricks</h3>
+                    <ul>
+                        <li><strong>Stats Decay:</strong> Pet stats decrease over time, so check regularly!</li>
+                        <li><strong>Low Health:</strong> If health drops below 30%, take your pet for a health check</li>
+                        <li><strong>Free Rest:</strong> Use the free Rest action to restore energy without spending</li>
+                        <li><strong>Balance:</strong> Balance earning money with spending on pet care</li>
+                        <li><strong>Mood Indicators:</strong> Watch your pet's mood to understand their needs</li>
+                        <li><strong>Expense Tracking:</strong> Review your expense list to see where money goes</li>
+                    </ul>
+                </div>
+
+                <div class="help-section">
+                    <h3>📊 Understanding Stats</h3>
+                    <ul>
+                        <li><strong>Hunger:</strong> Feed regularly to keep it above 40%</li>
+                        <li><strong>Happiness:</strong> Play and interact to keep your pet happy</li>
+                        <li><strong>Health:</strong> Keep clean and get regular check-ups</li>
+                        <li><strong>Energy:</strong> Let your pet rest when energy is low</li>
+                    </ul>
+                    <p><em>Note: Low stats in one area can affect others, so maintain balance!</em></p>
+                </div>
+            </div>
+            <div class="help-footer">
+                <button id="closeHelpBtn2" class="btn btn-primary">Got it!</button>
+            </div>
         </div>
     </div>
 
