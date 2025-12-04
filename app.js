@@ -64,6 +64,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (renameBtn) {
         renameBtn.addEventListener('click', handleRenamePet);
     }
+
+    const renameModal = document.getElementById('renameModal');
+    const closeRenameBtn = document.getElementById('closeRenameBtn');
+    const cancelRenameBtn = document.getElementById('cancelRenameBtn');
+    const saveRenameBtn = document.getElementById('saveRenameBtn');
+    
+    if (closeRenameBtn) closeRenameBtn.addEventListener('click', closeRenameModal);
+    if (cancelRenameBtn) cancelRenameBtn.addEventListener('click', closeRenameModal);
+    if (saveRenameBtn) saveRenameBtn.addEventListener('click', saveRename);
+    
+    if (renameModal) {
+        renameModal.addEventListener('click', (e) => {
+            if (e.target === renameModal) {
+                closeRenameModal();
+            }
+        });
+    }
 });
 
 function createPet() {
@@ -83,10 +100,23 @@ function createPet() {
     
     pet = new VirtualPet(name, type, budget);
     
-    // Hide setup modal, show game area
-    document.getElementById('setupModal').classList.add('hidden');
+    const setupModal = document.getElementById('setupModal');
     const gameArea = document.getElementById('gameArea');
-    gameArea.classList.remove('hidden');
+    const helpBtn = document.getElementById('helpBtn');
+    
+    if (setupModal) {
+        setupModal.classList.add('modal-closing');
+        setTimeout(() => {
+            setupModal.classList.add('hidden');
+            setupModal.classList.remove('modal-closing');
+        }, 220);
+    }
+    if (gameArea) {
+        gameArea.classList.remove('hidden');
+    }
+    if (helpBtn) {
+        helpBtn.classList.remove('hidden');
+    }
     
     // Update display immediately (synchronously)
     updatePetDisplay();
@@ -285,58 +315,65 @@ function updateSpendingChart() {
     if (!canvas) return;
     
     const breakdown = pet.getExpenseBreakdown();
-    const labels = Object.keys(breakdown);
+    let labels = Object.keys(breakdown);
+    let data;
+    let isEmpty = false;
+    
     if (labels.length === 0) {
-        if (spendingChart) {
-            spendingChart.destroy();
-            spendingChart = null;
-        }
-        return;
+        labels = ['No spending yet'];
+        data = [1];
+        isEmpty = true;
+    } else {
+        data = labels.map(label => breakdown[label]);
     }
     
-    const data = labels.map(label => breakdown[label]);
     const colors = [
         '#4e79a7', '#f28e2b', '#e15759', '#76b7b2',
         '#59a14f', '#edc949', '#af7aa1', '#ff9da7'
     ];
     
-    if (spendingChart) {
-        spendingChart.destroy();
-    }
+    const dataset = {
+        data,
+        backgroundColor: isEmpty ? ['#e5e7eb'] : colors.slice(0, labels.length),
+        borderWidth: 2,
+        borderColor: '#ffffff'
+    };
     
-    spendingChart = new Chart(canvas.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels,
-            datasets: [{
-                data,
-                backgroundColor: colors.slice(0, labels.length),
-                borderWidth: 2,
-                borderColor: '#ffffff'
-            }]
-        },
-        options: {
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 14,
-                        boxHeight: 14
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const label = ctx.label || '';
-                            const value = ctx.parsed;
-                            return `${label}: $${value.toFixed(2)}`;
+    if (!spendingChart) {
+        spendingChart = new Chart(canvas.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [dataset]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 14,
+                            boxHeight: 14
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                if (isEmpty) return 'No spending yet';
+                                const label = ctx.label || '';
+                                const value = ctx.parsed;
+                                return `${label}: $${value.toFixed(2)}`;
+                            }
                         }
                     }
-                }
-            },
-            cutout: '55%'
-        }
-    });
+                },
+                cutout: '55%'
+            }
+        });
+    } else {
+        spendingChart.data.labels = labels;
+        spendingChart.data.datasets[0] = dataset;
+        spendingChart.update();
+    }
 }
 
 function updateBudgetChart() {
@@ -349,58 +386,63 @@ function updateBudgetChart() {
     const availableData = budgetHistory.map(point => point.available);
     const spentData = budgetHistory.map(point => point.spent);
     
-    if (budgetChart) {
-        budgetChart.destroy();
-    }
-    
-    budgetChart = new Chart(canvas.getContext('2d'), {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [
-                {
-                    label: 'Available Budget',
-                    data: availableData,
-                    borderColor: '#4ecdc4',
-                    backgroundColor: 'rgba(78,205,196,0.2)',
-                    tension: 0.3,
-                    fill: true
-                },
-                {
-                    label: 'Total Spent',
-                    data: spentData,
-                    borderColor: '#ff6b6b',
-                    backgroundColor: 'rgba(255,107,107,0.15)',
-                    tension: 0.3,
-                    fill: true
-                }
-            ]
+    const datasets = [
+        {
+            label: 'Available Budget',
+            data: availableData,
+            borderColor: '#4ecdc4',
+            backgroundColor: 'rgba(78,205,196,0.2)',
+            tension: 0.3,
+            fill: true
         },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: (value) => `$${value}`
-                    }
-                }
+        {
+            label: 'Total Spent',
+            data: spentData,
+            borderColor: '#ff6b6b',
+            backgroundColor: 'rgba(255,107,107,0.15)',
+            tension: 0.3,
+            fill: true
+        }
+    ];
+    
+    if (!budgetChart) {
+        budgetChart = new Chart(canvas.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets
             },
-            plugins: {
-                legend: {
-                    position: 'bottom'
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (value) => `$${value}`
+                        }
+                    }
                 },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const label = ctx.dataset.label || '';
-                            const value = ctx.parsed.y;
-                            return `${label}: $${value.toFixed(2)}`;
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                const label = ctx.dataset.label || '';
+                                const value = ctx.parsed.y;
+                                return `${label}: $${value.toFixed(2)}`;
+                            }
                         }
                     }
                 }
             }
-        }
-    });
+        });
+    } else {
+        budgetChart.data.labels = labels;
+        budgetChart.data.datasets[0].data = availableData;
+        budgetChart.data.datasets[1].data = spentData;
+        budgetChart.update();
+    }
 }
 
 function updateExpenseList() {
@@ -408,7 +450,7 @@ function updateExpenseList() {
     expenseList.innerHTML = '';
     
     if (pet.expenses.length === 0) {
-        expenseList.innerHTML = '<div class="expense-item">No expenses yet</div>';
+        expenseList.innerHTML = '<div class="expense-empty">No expenses yet – start by caring for your pet!</div>';
         return;
     }
     
@@ -417,9 +459,25 @@ function updateExpenseList() {
     recentExpenses.forEach(expense => {
         const item = document.createElement('div');
         item.className = 'expense-item';
+        
+        const icons = {
+            'Food': '🍽️',
+            'Play Activity': '🎾',
+            'Cleaning Supplies': '🧼',
+            'Vet Visit': '🏥',
+            'Toy Purchase': '🧸'
+        };
+        const icon = icons[expense.category] || '💳';
+        
         item.innerHTML = `
-            <span>${expense.category}</span>
-            <span>$${expense.amount.toFixed(2)}</span>
+            <div class="expense-main">
+                <span class="expense-icon">${icon}</span>
+                <div class="expense-text">
+                    <div class="expense-category">${expense.category}</div>
+                    <div class="expense-time">${expense.timestamp}</div>
+                </div>
+            </div>
+            <div class="expense-amount">-$${expense.amount.toFixed(2)}</div>
         `;
         expenseList.appendChild(item);
     });
@@ -491,18 +549,18 @@ function handleRenamePet() {
         return;
     }
     
-    const newName = prompt('Rename your pet:', pet.name);
-    if (newName === null) return;
+    const renameModal = document.getElementById('renameModal');
+    const input = document.getElementById('renameInput');
+    if (!renameModal || !input) return;
     
-    const trimmed = newName.trim();
-    if (!trimmed) {
-        showMessage('Pet name cannot be empty!', 'error');
-        return;
-    }
+    input.value = pet.name;
+    renameModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
     
-    pet.name = trimmed;
-    updatePetDisplay();
-    showMessage(`Your pet is now called ${trimmed}!`, 'success');
+    setTimeout(() => {
+        input.focus();
+        input.select();
+    }, 50);
 }
 
 function triggerActionEmojis(actionKey) {
@@ -544,6 +602,32 @@ function playPetAnimation(animationClass) {
     // Force reflow so the animation can restart
     void img.offsetWidth;
     img.classList.add(animationClass);
+}
+
+function closeRenameModal() {
+    const renameModal = document.getElementById('renameModal');
+    if (renameModal) {
+        renameModal.classList.add('hidden');
+    }
+    document.body.style.overflow = '';
+}
+
+function saveRename() {
+    if (!pet) return;
+    
+    const input = document.getElementById('renameInput');
+    if (!input) return;
+    
+    const trimmed = input.value.trim();
+    if (!trimmed) {
+        showMessage('Pet name cannot be empty!', 'error');
+        return;
+    }
+    
+    pet.name = trimmed;
+    updatePetDisplay();
+    closeRenameModal();
+    showMessage(`Your pet is now called ${trimmed}!`, 'success');
 }
 
 // Q&A System
@@ -791,7 +875,10 @@ function openHelp() {
     const helpModal = document.getElementById('helpModal');
     if (helpModal) {
         helpModal.classList.remove('hidden');
-        // Prevent body scroll when modal is open
+        // trigger CSS transition
+        requestAnimationFrame(() => {
+            helpModal.classList.add('modal-visible');
+        });
         document.body.style.overflow = 'hidden';
     }
 }
@@ -799,8 +886,12 @@ function openHelp() {
 function closeHelp() {
     const helpModal = document.getElementById('helpModal');
     if (helpModal) {
-        helpModal.classList.add('hidden');
-        // Restore body scroll
+        helpModal.classList.remove('modal-visible');
+        helpModal.classList.add('modal-closing');
+        setTimeout(() => {
+            helpModal.classList.add('hidden');
+            helpModal.classList.remove('modal-closing');
+        }, 220);
         document.body.style.overflow = 'auto';
     }
 }

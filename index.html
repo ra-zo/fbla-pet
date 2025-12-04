@@ -16,7 +16,7 @@
                     <h1>🐾 Virtual Pet Care Simulator</h1>
                     <p class="subtitle">Learn about pet ownership and financial responsibility!</p>
                 </div>
-                <button id="helpBtn" class="help-btn" title="Help & Guide">❓ Help</button>
+                <button id="helpBtn" class="help-btn hidden" title="Help & Guide">❓ Help</button>
             </div>
         </header>
 
@@ -55,13 +55,9 @@
                     <div class="pet-display-container">
                         <div class="pet-video-wrapper">
                             <img id="petImage" src="transparentcorgi.png" alt="Pet" class="pet-image">
-                            <div class="pet-sparkle">✨</div>
                         </div>
                         <div id="petNameDisplay" class="pet-name">
                             <span id="petNameText"></span>
-                            <button id="renamePetBtn" class="rename-pet-btn" aria-label="Rename pet">
-                                ✏️
-                            </button>
                         </div>
                         <div id="petMood" class="pet-mood"></div>
                     </div>
@@ -249,10 +245,15 @@
                 <div class="qa-section-compact">
                     <h3 class="qa-title-compact"><span class="title-emoji">💡</span> <span class="title-text">Interactive Q&A</span></h3>
                     <p class="qa-description-compact">Test your knowledge about pet care and financial responsibility!</p>
+                    <ul class="qa-learning-list">
+                        <li>Understand how everyday choices affect your budget.</li>
+                        <li>Learn when to spend, save, or visit the vet.</li>
+                        <li>Practice planning ahead for your pet&rsquo;s needs.</li>
+                    </ul>
                     <button id="startQABtn" class="btn btn-primary qa-btn-compact">Start Quiz</button>
                 </div>
                 
-                <div class="tips-section-compact">
+                        <div class="tips-section-compact">
                     <h3 class="tips-title-compact"><span class="title-emoji">✨</span> <span class="title-text">Quick Tips</span></h3>
                     <div class="tips-list">
                         <div class="tip-item">
@@ -299,13 +300,29 @@
 
         </div>
             
-            <div class="credits-section">
-                <p>Created by Natalie Razo & Presley Symonds for FBLA</p>
-            </div>
     </div>
 
     <!-- Sonner Toaster -->
     <div id="sonner-root"></div>
+
+    <!-- Rename Pet Modal -->
+    <div id="renameModal" class="rename-modal hidden">
+        <div class="rename-modal-content">
+            <div class="rename-header">
+                <h3>Rename Your Pet</h3>
+                <button id="closeRenameBtn" class="rename-close-btn">×</button>
+            </div>
+            <div class="rename-body">
+                <label for="renameInput" class="rename-label">New name</label>
+                <input type="text" id="renameInput" class="rename-input" maxlength="20" placeholder="Enter a fun pet name">
+                <p class="rename-hint">Tip: Choose a name that matches your pet&rsquo;s personality!</p>
+            </div>
+            <div class="rename-footer">
+                <button id="cancelRenameBtn" class="btn btn-secondary btn-compact">Cancel</button>
+                <button id="saveRenameBtn" class="btn btn-primary btn-compact">Save Name</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Help Modal -->
     <div id="helpModal" class="help-modal hidden">
